@@ -121,18 +121,13 @@ function animateParticles() {
 initParticles();
 animateParticles();
 
-/* ... LE RESTE DU FICHIER (BOOT TEXTE, CLICS...) NE CHANGE PAS ... */
-
-
 /* =========================================
    2. TEXTE DE BIO (Séquence de Boot)
    ========================================= */
-// On décale légèrement l'apparition de chaque paragraphe
 const bioParagraphs = document.querySelectorAll('.bio-text p');
 bioParagraphs.forEach((p, index) => {
     p.style.animationDelay = `${index * 0.2}s`;
 });
-
 
 /* =========================================
    3. SYSTÈME DE TIR (FIX : Retour du flottement)
@@ -144,35 +139,24 @@ const targets = document.querySelectorAll('.shootable');
 
 targets.forEach(target => {
     target.addEventListener('click', function() {
-        // 1. Son
         try {
             hitSound.currentTime = 0;
             hitSound.play().catch(() => {}); 
         } catch (e) {}
 
-        // 2. L'image tremble
         const targetClass = this.getAttribute('data-target');
         const imageToShake = document.querySelector('.' + targetClass);
 
         if (imageToShake) {
-            // On retire la classe au cas où elle y serait déjà (pour pouvoir spammer)
             imageToShake.classList.remove('shake-active');
-            
-            // Astuce magique pour relancer une animation CSS immédiatement
             void imageToShake.offsetWidth; 
-            
-            // On lance le tremblement
             imageToShake.classList.add('shake-active');
             
-            // LE FIX EST ICI : On écoute la fin de l'animation
-            // Quand le tremblement est fini (0.5s), on retire la classe.
-            // L'image reprendra alors automatiquement son animation de base (le flottement).
             imageToShake.addEventListener('animationend', () => {
                 imageToShake.classList.remove('shake-active');
-            }, { once: true }); // "once: true" nettoie l'écouteur après usage pour ne pas alourdir la page
+            }, { once: true });
         }
 
-        // 3. Flash rouge sur le mot
         this.classList.add('word-clicked');
         setTimeout(() => {
             this.classList.remove('word-clicked');
@@ -180,14 +164,12 @@ targets.forEach(target => {
     });
 });
 
-
 /* =========================================
    4. APPARITION DES CARTOUCHES (Skills)
    ========================================= */
 const cardsObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
-            // Quand la carte est visible, on la remet à sa place
             entry.target.style.opacity = "1";
             entry.target.style.transform = "translateY(0)";
             cardsObserver.unobserve(entry.target);
@@ -196,61 +178,49 @@ const cardsObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 
 document.querySelectorAll('.skill-card').forEach((card, index) => {
-    // État initial (Caché et descendu)
     card.style.opacity = "0";
     card.style.transform = "translateY(50px)";
     card.style.transition = "opacity 0.6s ease, transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-    
-    // Délai en cascade (la 1ère arrive vite, la 2ème après...)
     card.style.transitionDelay = `${index * 0.05}s`; 
-    
     cardsObserver.observe(card);
 });
+
 /* =========================================
    5. EFFET HACKER SUR LE NOM (Décryptage)
    ========================================= */
 const nameElement = document.querySelector('.logo-area h1');
-const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Les lettres possibles
+const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
 let interval = null;
 
-// On sauvegarde le texte original ("MELVYN GELLEE") dans une donnée cachée
 if(nameElement) {
     nameElement.dataset.value = nameElement.innerText;
 
     nameElement.onmouseover = event => {  
         let iteration = 0;
-        
-        // On nettoie l'intervalle précédent pour éviter les bugs si on spamme
         clearInterval(interval);
         
         interval = setInterval(() => {
             event.target.innerText = event.target.innerText
-                .split("") // On coupe le mot en lettres
+                .split("")
                 .map((letter, index) => {
-                    // Si on a fini d'animer cette lettre, on remet la vraie
                     if(index < iteration) {
                         return event.target.dataset.value[index];
                     }
-                    
-                    // Sinon, on met une lettre au hasard
-                    // Astuce : pour garder le saut de ligne, on vérifie si c'est un espace ou un retour
                     if (event.target.dataset.value[index] === '\n') return '\n';
                     if (event.target.dataset.value[index] === ' ') return ' ';
                     
                     return letters[Math.floor(Math.random() * 26)];
                 })
-                .join(""); // On recolle les lettres
+                .join(""); 
             
-            // Quand tout est fini, on arrête
             if(iteration >= event.target.dataset.value.length){ 
                 clearInterval(interval);
             }
-            
-            // Vitesse de décryptage (plus le chiffre est petit, plus c'est lent)
             iteration += 1 / 3; 
-        }, 30); // Vitesse de changement des lettres (30ms)
+        }, 30); 
     }
 }
+
 /* =========================================
    6. GESTION DES VIDÉOS AU SURVOL
    ========================================= */
@@ -258,10 +228,7 @@ const videoCards = document.querySelectorAll('.project-card:has(video)');
 
 videoCards.forEach(card => {
     const video = card.querySelector('video');
-
-    // Quand la souris ENTRE
     card.addEventListener('mouseenter', () => {
-        // play() renvoie une promesse, on gère les erreurs (si le navigateur bloque)
         let playPromise = video.play();
         if (playPromise !== undefined) {
             playPromise.catch(error => {
@@ -269,53 +236,79 @@ videoCards.forEach(card => {
             });
         }
     });
-
-    // Quand la souris SORT
     card.addEventListener('mouseleave', () => {
         video.pause();
-        video.currentTime = 0; // On remet la vidéo au début pour la prochaine fois
+        video.currentTime = 0; 
     });
 });
+
 /* =========================================
-   7. MODAL PLEIN ÉCRAN AU CLIC
+   7. MODAL PLEIN ÉCRAN AU CLIC (AVEC BOUTON MORE DETAILS)
    ========================================= */
 const modal = document.getElementById('video-modal');
 const fullScreenVideo = document.getElementById('full-screen-video');
 const closeModalBtn = document.querySelector('.close-modal');
-const triggers = document.querySelectorAll('.video-trigger'); // Les cartes qui ont une vidéo
+const triggers = document.querySelectorAll('.video-trigger'); 
+const modalMoreDetailsBtn = document.getElementById('modal-more-details-btn');
+let currentTargetModalId = null; // Stocke l'ID du projet en cours
 
 // FONCTION : OUVRIR LE MODAL
 triggers.forEach(trigger => {
-    trigger.addEventListener('click', function() {
-        // 1. Récupérer l'URL de la vidéo depuis l'attribut data-video
+    trigger.addEventListener('click', function(e) {
+        // Empêche le clic si on a cliqué sur un bouton à l'intérieur de la carte
+        if (e.target.closest('button')) return;
+
+        // 1. Récupérer l'URL de la vidéo
         const videoSource = this.getAttribute('data-video');
-        
-        // 2. L'injecter dans le grand lecteur
         fullScreenVideo.src = videoSource;
         
-        // 3. Afficher le modal et lancer la lecture (avec le son cette fois)
+        // 2. Trouver la modale de détails associée à cette vidéo
+        const detailsBtn = this.querySelector('.btn-details-trigger');
+        if (detailsBtn) {
+            currentTargetModalId = detailsBtn.getAttribute('data-modal');
+            if (modalMoreDetailsBtn) modalMoreDetailsBtn.style.display = 'flex';
+        } else {
+            currentTargetModalId = null;
+            if (modalMoreDetailsBtn) modalMoreDetailsBtn.style.display = 'none';
+        }
+        
+        // 3. Afficher et lire
         modal.classList.add('active');
         fullScreenVideo.play();
-        fullScreenVideo.volume = 0.8; // Volume à 80%
+        fullScreenVideo.volume = 0.8; 
     });
 });
 
-// FONCTION : FERMER LE MODAL
+// ACTION DU NOUVEAU BOUTON MORE DETAILS DANS LA VIDÉO
+if (modalMoreDetailsBtn) {
+    modalMoreDetailsBtn.addEventListener('click', () => {
+        closeVideoModal(); // Coupe la vidéo
+        if (currentTargetModalId) {
+            const targetModal = document.getElementById(currentTargetModalId);
+            if (targetModal) {
+                targetModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+    });
+}
+
+// FONCTION : FERMER LE MODAL VIDÉO
 function closeVideoModal() {
     modal.classList.remove('active');
     fullScreenVideo.pause();
-    fullScreenVideo.src = ""; // On vide la source pour arrêter le chargement
+    fullScreenVideo.src = ""; 
 }
 
-// Fermer avec la croix
 closeModalBtn.addEventListener('click', closeVideoModal);
 
-// Fermer en cliquant en dehors de la vidéo (sur le fond noir)
 modal.addEventListener('click', (e) => {
+    // Ne ferme pas si on clique sur la vidéo ou le bouton details
     if (e.target === modal) {
         closeVideoModal();
     }
 });
+
 /* =========================================
    8. GESTION DES DOSSIERS PROJETS (DETAILS)
    ========================================= */
@@ -326,15 +319,13 @@ const allModals = document.querySelectorAll('.project-modal');
 // 1. OUVRIR LE BON MODAL
 detailButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
-        // Empêche le clic de remonter et d'ouvrir la vidéo par erreur
         e.stopPropagation(); 
-        
         const modalId = btn.getAttribute('data-modal');
         const modalToOpen = document.getElementById(modalId);
         
         if(modalToOpen) {
             modalToOpen.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Bloque le scroll de la page principale
+            document.body.style.overflow = 'hidden'; 
         }
     });
 });
@@ -343,19 +334,19 @@ detailButtons.forEach(btn => {
 closeDetailButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         allModals.forEach(m => m.classList.remove('active'));
-        document.body.style.overflow = 'auto'; // Réactive le scroll
+        document.body.style.overflow = 'auto'; 
     });
 });
 
-// Fermer en cliquant en dehors du dossier (sur le fond noir)
-allModals.forEach(modal => {
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('active');
+allModals.forEach(projectModal => {
+    projectModal.addEventListener('click', (e) => {
+        if (e.target === projectModal) {
+            projectModal.classList.remove('active');
             document.body.style.overflow = 'auto';
         }
     });
 });
+
 /* =========================================
    9. SLIDER AVANT / APRÈS (CHROMESTHESIA)
    ========================================= */
@@ -366,14 +357,11 @@ const sliderLine = document.querySelector('.c-slider-line');
 if (sliderInput && overlayImage && sliderLine) {
     sliderInput.addEventListener('input', (e) => {
         const sliderValue = e.target.value + "%";
-        
-        // 1. On change la largeur de l'image du dessus (Miro)
         overlayImage.style.width = sliderValue;
-        
-        // 2. On bouge la ligne visuelle
         sliderLine.style.left = sliderValue;
     });
 }
+
 /* =========================================
    10. CODE SNIPPET TOGGLE (UNGOR BOK)
    ========================================= */
@@ -396,6 +384,7 @@ if (btnToggleCode && codeWrapper) {
         }
     });
 }
+
 /* =========================================
    11. TIMELINE XP BAR (SCROLL PROGRESS)
    ========================================= */
@@ -404,30 +393,22 @@ const timelineSection = document.querySelector('.timeline');
 
 if (xpBar && timelineSection) {
     window.addEventListener('scroll', () => {
-        // On récupère la position de la timeline par rapport au haut de la page
         const sectionTop = timelineSection.offsetTop;
         const sectionHeight = timelineSection.offsetHeight;
-        
-        // On calcule où est le milieu de l'écran du visiteur
         const scrollPosition = window.scrollY + (window.innerHeight / 2);
 
-        // Si on est avant la section, hauteur = 0
         if (scrollPosition < sectionTop) {
             xpBar.style.height = '0px';
-        } 
-        // Si on a dépassé la section, hauteur = 100%
-        else if (scrollPosition > sectionTop + sectionHeight) {
+        } else if (scrollPosition > sectionTop + sectionHeight) {
             xpBar.style.height = '100%';
-        } 
-        // Sinon, on calcule le pourcentage
-        else {
+        } else {
             const distance = scrollPosition - sectionTop;
-            // On s'arrête un peu avant la fin pour pas dépasser (ex: 95%)
             const height = Math.min(distance, sectionHeight - 50); 
             xpBar.style.height = `${height}px`;
         }
     });
 }
+
 /* =========================================
    12. COPY EMAIL TO CLIPBOARD
    ========================================= */
@@ -435,21 +416,16 @@ function copyEmail() {
     const email = "melvyngellee@gmail.com";
     const feedback = document.getElementById('copy-msg');
     
-    // API moderne pour copier
     navigator.clipboard.writeText(email).then(() => {
-        // 1. Afficher le feedback "COPIED!"
         feedback.classList.add('active');
-        
-        // 2. L'enlever après 2 secondes
         setTimeout(() => {
             feedback.classList.remove('active');
         }, 2000);
     }).catch(err => {
-        console.error('Failed to copy: ', err);
-        // Fallback si jamais ça marche pas (vieux navigateurs)
         alert("Email: " + email);
     });
 }
+
 /* =========================================
    13. SCROLL SPY (Navigation Active)
    ========================================= */
@@ -459,16 +435,14 @@ const navLinks = document.querySelectorAll(".hud-link");
 const observerOptions = {
     root: null,
     rootMargin: "0px",
-    threshold: 0.3 // La section doit être visible à 30% pour s'activer
+    threshold: 0.3 
 };
 
 const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
         if (entry.isIntersecting) {
-            // On retire la classe active de tous les liens
             navLinks.forEach((link) => {
                 link.classList.remove("active");
-                // Si l'attribut href correspond à l'id de la section visible
                 if (link.getAttribute("href").substring(1) === entry.target.id) {
                     link.classList.add("active");
                 }
@@ -480,6 +454,7 @@ const observer = new IntersectionObserver((entries) => {
 sections.forEach((section) => {
     observer.observe(section);
 });
+
 /* =========================================
    14. MOBILE BIO READ MORE
    ========================================= */
@@ -489,8 +464,6 @@ const bioText = document.querySelector('.bio-text');
 if (bioBtn && bioText) {
     bioBtn.addEventListener('click', () => {
         bioText.classList.toggle('expanded');
-        
-        // On détecte si on est sur la page en français
         const isFrench = document.documentElement.lang === 'fr';
 
         if (bioText.classList.contains('expanded')) {
@@ -501,6 +474,7 @@ if (bioBtn && bioText) {
         }
     });
 }
+
 /* =========================================
    15. MOBILE CAROUSEL AUTO-SCROLL
    ========================================= */
@@ -508,18 +482,14 @@ const carousel = document.querySelector('.bio-images');
 
 if (carousel) {
     let scrollAmount = 0;
-    let scrollSpeed = 0.5; // Vitesse de défilement (plus petit = plus lent)
+    let scrollSpeed = 0.5; 
     let isPaused = false;
 
-    // Fonction d'animation
     function autoScroll() {
-        if (!isPaused && window.innerWidth <= 768) { // Seulement sur mobile
+        if (!isPaused && window.innerWidth <= 768) {
             carousel.scrollLeft += scrollSpeed;
             scrollAmount += scrollSpeed;
 
-            // Si on arrive au bout (ou presque), on revient au début pour boucler
-            // Note: Faire une vraie boucle infinie demande de dupliquer les images, 
-            // ici on fait un retour au début simple quand c'est fini.
             if (carousel.scrollLeft >= (carousel.scrollWidth - carousel.clientWidth - 1)) {
                 carousel.scrollLeft = 0;
             }
@@ -527,42 +497,34 @@ if (carousel) {
         requestAnimationFrame(autoScroll);
     }
 
-    // Lancer l'animation
     autoScroll();
-
-    // Arrêter si l'utilisateur touche le carrousel
     carousel.addEventListener('touchstart', () => { isPaused = true; });
     carousel.addEventListener('touchend', () => { 
-        // On attend 2 secondes après le relâchement avant de reprendre
         setTimeout(() => { isPaused = false; }, 2000); 
     });
 }
+
 /* =========================================
    16. CV SELECTION MODAL
    ========================================= */
-// Sélectionne tous les boutons qui mènent au CV (PC et potentielles icônes mobiles)
-// NOTE : Assure-toi que tes boutons CV dans le HTML ont la classe "js-trigger-cv"
 const cvTriggers = document.querySelectorAll('.hud-cv-btn, .cv-trigger-link'); 
 const cvModal = document.getElementById('cv-choice-modal');
 const closeCvBtn = document.querySelector('.close-cv-modal');
 
 if (cvModal) {
-    // Ouvrir la modal au clic
     cvTriggers.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.preventDefault(); // Empêche le téléchargement direct
+            e.preventDefault(); 
             cvModal.classList.add('active');
         });
     });
 
-    // Fermer avec la croix
     if (closeCvBtn) {
         closeCvBtn.addEventListener('click', () => {
             cvModal.classList.remove('active');
         });
     }
 
-    // Fermer en cliquant en dehors
     cvModal.addEventListener('click', (e) => {
         if (e.target === cvModal) {
             cvModal.classList.remove('active');
