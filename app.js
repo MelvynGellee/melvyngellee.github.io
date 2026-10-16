@@ -531,3 +531,65 @@ if (cvModal) {
         }
     });
 }
+document.addEventListener("DOMContentLoaded", () => {
+    /* =========================================
+       1. HOVER FX GLOW (La lumière qui suit la souris)
+       ========================================= */
+    // On cible toutes les cartes interactives
+    const glowCards = document.querySelectorAll('.project-card, .skill-card, .hub-card');
+    
+    glowCards.forEach(card => {
+        // Au lieu de modifier le HTML, on injecte la couche de lumière via JS
+        const glowLayer = document.createElement('div');
+        glowLayer.classList.add('glow-layer');
+        card.appendChild(glowLayer);
+
+        // Quand la souris bouge sur la carte, on met à jour les variables CSS --mouse-x et --mouse-y
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Injecte les coordonnées exactes au CSS
+            glowLayer.style.setProperty('--mouse-x', `${x}px`);
+            glowLayer.style.setProperty('--mouse-y', `${y}px`);
+        });
+    });
+
+    /* =========================================
+       2. SCROLL REVEAL (Apparition fluide au défilement)
+       ========================================= */
+    // Options : l'élément s'anime quand 15% de sa hauteur est visible à l'écran
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15 
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Dès que l'élément est vu, on lui ajoute la classe 'visible'
+                entry.target.classList.add('visible');
+                // On arrête de l'observer pour qu'il ne re-disparaisse pas si on remonte
+                observer.unobserve(entry.target); 
+            }
+        });
+    }, observerOptions);
+
+    // On sélectionne tous les blocs qu'on veut voir apparaître au scroll
+    const revealElements = document.querySelectorAll(`
+        .section-title, 
+        .project-card, 
+        .skill-category h3, 
+        .skill-card, 
+        .timeline-block, 
+        .hub-card
+    `);
+    
+    // On leur ajoute la classe CSS de départ et on les met sous surveillance
+    revealElements.forEach(el => {
+        el.classList.add('reveal');
+        observer.observe(el);
+    });
+});

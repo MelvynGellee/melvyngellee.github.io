@@ -1,14 +1,16 @@
-/* =========================================
-   1. VARIABLES & RESET
-   ========================================= */
+/* ========================================= */
+/* 1. VARIABLES & RESET                      */
+/* ========================================= */
 :root {
     --bg-gradient: linear-gradient(135deg, #2b3a67 0%, #1a1a1a 60%, #000000 100%);
     --text-white: #ffffff;
-    --accent-blue: #4a90e2; /* Bleu clair principal */
-    --accent-gold: #ffd700; /* Or (Skills/WIP) */
+    --accent-blue: #4a90e2;
+    --accent-gold: #ffd700;
     --card-bg: #1e1e1e;
-    --font-head: 'Oswald', sans-serif;
-    --font-body: 'Montserrat', sans-serif;
+    --font-head: "Oswald", sans-serif;
+    --font-body: "Montserrat", sans-serif;
+    /* Courbe de Bezier organique type React Bits */
+    --smooth-bezier: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
@@ -23,10 +25,23 @@ body {
     color: var(--text-white);
     font-family: var(--font-body);
     display: flex;
-    overflow-x: hidden; /* Empêche le scroll horizontal global */
+    overflow-x: hidden;
 }
 
-/* Canvas des particules (Fond animé) */
+    /* Texture SVG Bruit Organique */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 99999;
+        opacity: 0.035;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
 #particle-canvas {
     position: fixed;
     top: 0;
@@ -38,9 +53,44 @@ body {
     background: transparent;
 }
 
-/* =========================================
-   2. SIDEBAR & NAVIGATION
-   ========================================= */
+/* ========================================= */
+/* EFFETS PREMIUM (GLOW & REVEAL)            */
+/* ========================================= */
+.glow-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(74, 144, 226, 0.15), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.6s var(--smooth-bezier);
+    z-index: 99;
+    border-radius: inherit;
+}
+
+.project-card:hover .glow-layer,
+.skill-card:hover .glow-layer,
+.hub-card:hover .glow-layer {
+    opacity: 1;
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+    transition: opacity 0.8s var(--smooth-bezier), transform 0.8s var(--smooth-bezier);
+    will-change: opacity, transform;
+}
+
+    .reveal.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+/* ========================================= */
+/* 2. SIDEBAR & NAVIGATION                   */
+/* ========================================= */
 .sidebar {
     position: fixed;
     top: 50px;
@@ -50,7 +100,7 @@ body {
 }
 
 .logo-area h1 {
-    font-family: 'Montserrat', sans-serif;
+    font-family: "Montserrat", sans-serif;
     font-weight: 900;
     font-size: 3rem;
     line-height: 1.1;
@@ -62,9 +112,8 @@ body {
     position: relative;
 }
 
-    /* Effet Glitch sur le Logo */
     .logo-area h1::before, .logo-area h1::after {
-        content: "MELVYN\AGELLEE"; /* \A fait le saut de ligne en CSS content */
+        content: "MELVYN\AGELLEE";
         position: absolute;
         top: 0;
         left: 0;
@@ -151,19 +200,17 @@ body {
     color: var(--accent-blue);
 }
 
-/* Navigation & Conteneur Principal Fixé */
 main {
     margin-left: 250px;
-    flex: 1; /* Prend tout l'espace restant proprement */
-    min-width: 0; /* Empêche les éléments de forcer l'élargissement de l'écran */
+    flex: 1;
+    min-width: 0;
     padding-right: 50px;
 }
 
 .top-nav {
-    display: none !important; /* On cache l'ancienne nav pour utiliser le HUD */
+    display: none !important;
 }
 
-/* Badge École */
 .school-badge {
     position: fixed;
     top: 50px;
@@ -199,9 +246,9 @@ main {
     }
 }
 
-/* =========================================
-   3. SECTION BIO (HISTOIRE & CERCLES)
-   ========================================= */
+/* ========================================= */
+/* 3. SECTION BIO                            */
+/* ========================================= */
 .section-bio {
     display: flex;
     justify-content: space-between;
@@ -215,7 +262,7 @@ main {
 }
 
 .title-decor {
-    font-family: 'Playfair Display', serif;
+    font-family: "Playfair Display", serif;
     font-size: 3.5rem;
     font-weight: 400;
     margin-bottom: 30px;
@@ -225,7 +272,7 @@ main {
 }
 
     .title-decor::after {
-        content: '';
+        content: "";
         display: block;
         width: 60px;
         height: 4px;
@@ -240,7 +287,7 @@ main {
     color: #ddd;
     margin-bottom: 15px;
     opacity: 0;
-    animation: bootText 0.8s ease-out forwards;
+    animation: bootText 0.8s var(--smooth-bezier) forwards;
 }
 
     .bio-text p:nth-child(1) {
@@ -279,11 +326,10 @@ main {
     }
 }
 
-/* Mots interactifs (Bio) */
 .bio-text strong {
     color: #e0e0e0;
     font-weight: 700;
-    transition: all 0.2s ease;
+    transition: all 0.3s var(--smooth-bezier);
     display: inline-block;
     cursor: crosshair;
     border-bottom: 1px solid transparent;
@@ -300,7 +346,6 @@ main {
     text-shadow: 0 0 10px red;
 }
 
-/* Images Cercles (Mis à jour : Taille réduite sur PC) */
 .bio-images {
     width: 50%;
     display: flex;
@@ -312,7 +357,6 @@ main {
 }
 
 .circle {
-    /* Nouvelle taille PC plus élégante */
     width: 180px;
     height: 180px;
     position: relative;
@@ -321,12 +365,12 @@ main {
     background-position: center;
     border: 3px solid rgba(255,255,255,0.5);
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    transition: scale 0.3s ease;
+    transition: transform 0.6s var(--smooth-bezier), border-color 0.4s var(--smooth-bezier);
     animation: float 4s ease-in-out infinite;
 }
 
     .circle:hover {
-        scale: 1.1;
+        transform: scale(1.1);
         border-color: white;
         z-index: 10;
     }
@@ -343,7 +387,7 @@ main {
         font-size: 0.8rem;
         white-space: nowrap;
         opacity: 0;
-        transition: opacity 0.3s;
+        transition: opacity 0.4s var(--smooth-bezier);
         pointer-events: none;
     }
 
@@ -352,32 +396,32 @@ main {
     }
 
 .c1 {
-    background-image: url('assets/rocketleague.jpg');
+    background-image: url("assets/rocketleague.jpg");
     animation-delay: 0s;
 }
 
 .c2 {
-    background-image: url('assets/tolkien.png');
+    background-image: url("assets/tolkien.png");
     animation-delay: 0.5s;
 }
 
 .c3 {
-    background-image: url('assets/volley.png');
+    background-image: url("assets/volley.png");
     animation-delay: 1s;
 }
 
 .c4 {
-    background-image: url('assets/chopin.png');
+    background-image: url("assets/chopin.png");
     animation-delay: 1.5s;
 }
 
 .c5 {
-    background-image: url('assets/lol.png');
+    background-image: url("assets/lol.png");
     animation-delay: 2s;
 }
 
 .c6 {
-    background-image: url('assets/stj.png');
+    background-image: url("assets/stj.png");
     animation-delay: 2.5s;
 }
 
@@ -409,9 +453,9 @@ main {
     animation: shake-impact 0.5s 1;
 }
 
-/* =========================================
-   4. SECTION SKILLS (CARTOUCHES)
-   ========================================= */
+/* ========================================= */
+/* 4. SECTION SKILLS                         */
+/* ========================================= */
 .section-skills {
     position: relative;
     width: 100%;
@@ -454,7 +498,6 @@ main {
     gap: 25px 20px;
 }
 
-/* Style de la Cartouche */
 .skill-card {
     position: relative;
     background: #1e1e24;
@@ -471,14 +514,12 @@ main {
     cursor: grab;
     transform: translateZ(0);
     z-index: 1;
-    /* Transition fluide pour l'animation */
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
-    overflow: visible !important;
+    transition: transform 0.6s var(--smooth-bezier), box-shadow 0.6s var(--smooth-bezier), border-color 0.4s var(--smooth-bezier), background-color 0.4s ease;
+    overflow: hidden !important;
 }
 
-    /* Grip (Rayures) */
     .skill-card::before {
-        content: '';
+        content: "";
         position: absolute;
         top: 5px;
         left: 50%;
@@ -490,9 +531,9 @@ main {
         z-index: 1;
         background: repeating-linear-gradient(to bottom, #2a2a35, #2a2a35 2px, #15151e 2px, #15151e 4px);
     }
-    /* Étiquette */
+
     .skill-card::after {
-        content: '';
+        content: "";
         position: absolute;
         top: 25px;
         bottom: 5px;
@@ -508,6 +549,7 @@ main {
     .skill-card img, .skill-card span {
         position: relative;
         z-index: 10;
+        pointer-events: none;
     }
 
 .skill-icon {
@@ -526,27 +568,26 @@ main {
     line-height: 1.2;
 }
 
-/* Interaction Cartouche (Saut) */
 .skill-card:hover {
-    transform: translateY(-25px) rotate(-4deg) scale(1.05) !important;
+    transform: translateY(-20px) scale(1.03) !important;
     border-color: var(--accent-blue);
     background-color: #252530;
-    box-shadow: 10px 35px 40px rgba(0,0,0,0.8) !important;
+    box-shadow: 0 35px 40px rgba(0,0,0,0.8) !important;
     z-index: 100 !important;
     border-bottom-color: var(--accent-gold) !important;
 }
-/* Interaction Cartouche (Clic/Insert) */
+
 .skill-card:active {
-    transform: translateY(0px) rotate(0deg) scale(0.98) !important;
-    box-shadow: 0 0 0 rgba(0,0,0,0), inset 0 5px 10px rgba(0,0,0,0.8) !important;
+    transform: translateY(0px) scale(0.98) !important;
+    box-shadow: inset 0 5px 10px rgba(0,0,0,0.8) !important;
     border-color: #00ff00 !important;
     background: #1a1a20 !important;
-    transition: all 0.05s ease !important;
+    transition: all 0.1s ease !important;
 }
 
-/* =========================================
-   5. SECTION PROJETS
-   ========================================= */
+/* ========================================= */
+/* 5. SECTION PROJETS                        */
+/* ========================================= */
 .projects-section {
     padding: 80px 5%;
     max-width: 1600px;
@@ -581,11 +622,10 @@ main {
     border: 1px solid rgba(255,255,255,0.1);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     cursor: pointer;
-    transition: all 0.4s ease;
+    transition: transform 0.6s var(--smooth-bezier), border-color 0.4s var(--smooth-bezier), box-shadow 0.6s var(--smooth-bezier);
     background: #1e1e1e;
 }
 
-/* Images & Vidéos */
 .project-bg {
     position: absolute;
     top: 0;
@@ -594,7 +634,7 @@ main {
     height: 100%;
     background-position: center;
     background-size: cover;
-    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 1s var(--smooth-bezier), filter 0.6s var(--smooth-bezier), opacity 0.6s ease;
     filter: brightness(0.8);
     z-index: 0;
 }
@@ -608,14 +648,14 @@ main {
     object-fit: cover;
     z-index: 1;
     opacity: 0;
-    transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: opacity 0.6s ease, transform 1s var(--smooth-bezier);
     filter: brightness(0.5);
 }
 
-/* Interactions Projet */
 .project-card:hover {
     border-color: var(--accent-blue);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    transform: translateY(-5px);
 }
 
     .project-card:hover .project-bg {
@@ -637,7 +677,6 @@ main {
         opacity: 1;
     }
 
-/* Contenu Projet */
 .project-content {
     position: absolute;
     bottom: 0;
@@ -647,11 +686,16 @@ main {
     background: linear-gradient(to top, rgba(0,0,0,0.95) 20%, rgba(0,0,0,0.6) 60%, transparent 100%);
     z-index: 10;
     transform: translateY(60px);
-    transition: transform 0.4s ease;
+    transition: transform 0.6s var(--smooth-bezier);
+    pointer-events: none;
 }
 
+    .project-content > * {
+        pointer-events: auto;
+    }
+
 .project-type {
-    font-family: 'Montserrat', sans-serif;
+    font-family: "Montserrat", sans-serif;
     font-size: 0.8rem;
     color: var(--accent-blue);
     font-weight: 700;
@@ -672,7 +716,7 @@ main {
 .project-details {
     margin-top: 15px;
     opacity: 0;
-    transition: opacity 0.4s ease 0.1s;
+    transition: opacity 0.6s var(--smooth-bezier) 0.1s;
 }
 
     .project-details p {
@@ -709,7 +753,7 @@ main {
     background: transparent;
     border: none;
     color: #ccc;
-    font-family: 'Oswald';
+    font-family: "Oswald";
     font-size: 0.9rem;
     cursor: pointer;
     transition: 0.3s;
@@ -756,9 +800,9 @@ main {
     pointer-events: none;
 }
 
-/* =========================================
-   6. BACKGROUND / PARCOURS (TIMELINE)
-   ========================================= */
+/* ========================================= */
+/* 6. BACKGROUND / PARCOURS                  */
+/* ========================================= */
 .section-timeline {
     padding: 80px 0;
     border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -814,12 +858,12 @@ main {
     border-radius: 8px;
     border: 1px solid #333;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+    transition: transform 0.6s var(--smooth-bezier), box-shadow 0.6s var(--smooth-bezier), border-color 0.4s var(--smooth-bezier);
 }
 
     .timeline-block:hover {
         transform: translateX(10px) translateY(-5px);
-        box-shadow: -5px 10px 20px rgba(0,0,0,0.5);
+        box-shadow: -5px 15px 30px rgba(0,0,0,0.5);
         border-color: #fff;
     }
 
@@ -839,7 +883,6 @@ main {
     font-family: var(--font-head);
 }
 
-/* Icônes Timeline */
 .timeline-icon {
     position: absolute;
     left: -69px;
@@ -858,7 +901,7 @@ main {
 
 .timeline-block:hover .timeline-icon {
     transform: rotate(360deg) scale(1.1);
-    transition: transform 0.6s ease;
+    transition: transform 0.8s var(--smooth-bezier);
 }
 
 .sorbonne-icon {
@@ -891,7 +934,7 @@ main {
     border: 1px solid #00f2ff;
     padding: 5px 15px;
     border-radius: 20px;
-    transition: all 0.3s;
+    transition: all 0.3s var(--smooth-bezier);
 }
 
     .timeline-cta:hover {
@@ -899,9 +942,9 @@ main {
         color: #000;
     }
 
-/* =========================================
-   7. FOOTER & CONTACT (HUB VERSION)
-   ========================================= */
+/* ========================================= */
+/* 7. FOOTER & CONTACT (HUB VERSION)         */
+/* ========================================= */
 footer#contact {
     position: relative;
     background: transparent;
@@ -909,9 +952,9 @@ footer#contact {
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     overflow: hidden;
 }
-    /* Glow Bleu Footer */
+
     footer#contact::before {
-        content: '';
+        content: "";
         position: absolute;
         bottom: -100px;
         left: 50%;
@@ -957,7 +1000,6 @@ footer#contact {
     font-weight: bold;
 }
 
-/* Contact Hub Grid */
 .contact-hub {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -976,7 +1018,7 @@ footer#contact {
     gap: 20px;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform 0.6s var(--smooth-bezier), background 0.4s ease, box-shadow 0.6s var(--smooth-bezier);
     position: relative;
     overflow: hidden;
 }
@@ -992,12 +1034,14 @@ footer#contact {
         font-size: 1.4rem;
         color: #ccc;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: 0.3s;
+        transition: 0.4s var(--smooth-bezier);
+        pointer-events: none;
     }
 
 .card-info {
     text-align: left;
     flex: 1;
+    pointer-events: none;
 }
 
     .card-info .label {
@@ -1019,15 +1063,15 @@ footer#contact {
 
 .arrow-icon {
     color: #666;
-    transition: 0.3s;
+    transition: 0.4s var(--smooth-bezier);
+    pointer-events: none;
 }
 
-/* Hub Interactions */
 .hub-card:hover {
     transform: translateY(-5px);
     background: rgba(30, 30, 40, 0.8);
     border-color: #666;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
 }
 
     .hub-card:hover .arrow-icon {
@@ -1094,7 +1138,7 @@ footer#contact {
     opacity: 0;
     pointer-events: none;
     transform: translateY(100%);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.5s var(--smooth-bezier);
 }
 
     .copy-feedback.active {
@@ -1109,10 +1153,9 @@ footer#contact {
     padding-top: 30px;
 }
 
-/* =========================================
-   8. MODALS & OVERLAYS (NOUVELLE DA "STORY")
-   ========================================= */
-/* Modal Vidéo Plein Écran */
+/* ========================================= */
+/* 8. MODALS & OVERLAYS                      */
+/* ========================================= */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1126,7 +1169,7 @@ footer#contact {
     align-items: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.5s var(--smooth-bezier);
 }
 
     .modal-overlay.active {
@@ -1164,7 +1207,6 @@ footer#contact {
         color: var(--accent-blue);
     }
 
-/* Modal Projet (Details) - Conteneur de fond */
 .project-modal {
     display: none;
     position: fixed;
@@ -1177,7 +1219,7 @@ footer#contact {
     justify-content: center;
     align-items: center;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s var(--smooth-bezier);
 }
 
     .project-modal.active {
@@ -1185,9 +1227,6 @@ footer#contact {
         opacity: 1;
     }
 
-/* =========================================
-   EFFET CYBER-SLICE (BOÎTE DE LA MODALE)
-   ========================================= */
 .modal-container {
     background: #15151e;
     width: 80%;
@@ -1199,38 +1238,35 @@ footer#contact {
     position: relative;
     border-radius: 8px;
     overflow: hidden;
-    /* État initial : Invisible et écrasé */
     opacity: 0;
     transform: scaleY(0.005) scaleX(0);
 }
 
-/* L'animation se déclenche quand on ajoute la classe .active */
 .project-modal.active .modal-container {
     animation: cyber-boot 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 @keyframes cyber-boot {
-    /* Étape 1 : Point lumineux flash blanc */
     0% {
         transform: scaleY(0.005) scaleX(0);
         opacity: 1;
         background: #fff;
         box-shadow: 0 0 80px #fff;
     }
-    /* Étape 2 : Ligne horizontale ultra-large (Rayon laser) */
+
     40% {
         transform: scaleY(0.005) scaleX(1);
         opacity: 1;
         background: var(--accent-blue);
         box-shadow: 0 0 100px var(--accent-blue);
     }
-    /* Étape 3 : Ouverture verticale fluide vers le noir */
+
     70% {
         transform: scaleY(1) scaleX(1);
         background: #15151e;
         box-shadow: 0 0 50px rgba(74, 144, 226, 0.2);
     }
-    /* Fin : Stabilisation */
+
     100% {
         transform: scaleY(1) scaleX(1);
         opacity: 1;
@@ -1239,17 +1275,12 @@ footer#contact {
     }
 }
 
-/* =========================================
-   FONDU DU CONTENU INTERNE
-   ========================================= */
-/* On cache le texte et les images pendant que la ligne s'étire pour éviter qu'ils soient déformés */
 .modal-container > * {
     opacity: 0;
     transform: translateY(15px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.5s var(--smooth-bezier), transform 0.5s var(--smooth-bezier);
 }
 
-/* Le contenu apparaît doucement SEULEMENT quand la boîte a fini de s'ouvrir (délai de 0.4s) */
 .project-modal.active .modal-container > * {
     opacity: 1;
     transform: translateY(0);
@@ -1271,7 +1302,7 @@ footer#contact {
 
 .modal-subtitle {
     color: var(--accent-blue);
-    font-family: 'Montserrat';
+    font-family: "Montserrat";
     letter-spacing: 2px;
     font-weight: bold;
 }
@@ -1291,19 +1322,13 @@ footer#contact {
         color: #ff3333;
     }
 
-/* MISE EN PAGE STORY (SPLIT SCREEN POUR PC) */
 .modal-scroll-content {
-    display: block; /* S'assure que le contenu défile */
+    display: block;
     overflow-y: auto;
-    padding: 40px 5%; /* Un peu de marge */
+    padding: 40px 5%;
     width: 100%;
 }
 
-/* =========================================
-   NOUVELLE STRUCTURE MODAL (SPLIT SCREEN - VIDEO LARGE)
-   ========================================= */
-
-/* Le conteneur principal */
 .modal-split-layout {
     display: grid;
     grid-template-columns: 0.8fr 1.2fr;
@@ -1312,12 +1337,6 @@ footer#contact {
     padding-bottom: 40px;
 }
 
-/* La colonne de gauche (L'histoire qui défile) */
-.story-column {
-    /* Rien de spécial */
-}
-
-/* La colonne de droite (La vidéo qui reste collée) */
 .visual-column {
     position: sticky;
     top: 0;
@@ -1325,12 +1344,11 @@ footer#contact {
     z-index: 10;
 }
 
-/* Style de la vidéo */
 .sticky-video-container {
     border: 1px solid #333;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6); /* Ombre plus prononcée */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
     background: #000;
 }
 
@@ -1383,7 +1401,7 @@ footer#contact {
 }
 
     .story-chapter-title::before {
-        content: '';
+        content: "";
         display: block;
         width: 5px;
         height: 30px;
@@ -1398,7 +1416,6 @@ footer#contact {
     text-align: justify;
 }
 
-/* DOCUMENTS INTÉGRÉS (INLINE CARDS) & ARCHIVES */
 .doc-card-inline, .dl-btn {
     display: flex;
     align-items: center;
@@ -1410,8 +1427,8 @@ footer#contact {
     margin: 10px 0;
     border-radius: 4px;
     text-decoration: none;
-    transition: 0.3s;
-    color: #ffffff !important; /* Force le texte en blanc pour lisibilité */
+    transition: 0.4s var(--smooth-bezier);
+    color: #ffffff !important;
 }
 
     .doc-card-inline:hover, .dl-btn:hover {
@@ -1438,7 +1455,6 @@ footer#contact {
     color: var(--accent-blue);
 }
 
-/* Elements Galerie & Figures */
 .modal-img {
     width: 100%;
     border-radius: 5px;
@@ -1459,7 +1475,7 @@ footer#contact {
         object-fit: cover;
         border-radius: 4px;
         border: 1px solid #444;
-        transition: transform 0.3s ease;
+        transition: transform 0.6s var(--smooth-bezier);
         cursor: zoom-in;
     }
 
@@ -1476,7 +1492,7 @@ footer#contact {
 
     .modal-figure figcaption {
         color: var(--accent-blue);
-        font-family: 'Montserrat';
+        font-family: "Montserrat";
         font-size: 0.9rem;
         text-align: center;
         margin-top: 8px;
@@ -1491,9 +1507,7 @@ footer#contact {
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
-/* --- THEMES SPÉCIFIQUES --- */
-
-/* Bloodlust (Rouge) */
+/* Thèmes spécifiques */
 #modal-bloodlust .modal-header {
     border-bottom: 3px solid #cf0000;
     background: linear-gradient(135deg, #1a0000 0%, #000000 100%);
@@ -1534,7 +1548,6 @@ footer#contact {
     background-color: #8a0000;
 }
 
-/* Chromesthesia (Neon) */
 #modal-glados .modal-header {
     background: linear-gradient(135deg, #1a0b2e 0%, #000000 100%);
     border-bottom: 2px solid #00f2ff;
@@ -1576,7 +1589,6 @@ footer#contact {
     border-radius: 10px;
 }
 
-/* Ungor Bok (Pierre/Or) */
 #modal-ungor .modal-header {
     background: linear-gradient(135deg, #2b2b2b 0%, #1a1a1a 100%);
     border-bottom: 3px solid #ff9d00;
@@ -1618,11 +1630,6 @@ footer#contact {
     border: 1px solid #ff9d00;
 }
 
-/* =========================================
-   MONSTER HUNTER THEME MODAL (CORRIGÉ & ÉPURÉ)
-   ========================================= */
-
-/* --- Variables locales --- */
 #modal-mh {
     --mh-gold: #c0a062;
     --mh-gold-bright: #eacda3;
@@ -1630,15 +1637,10 @@ footer#contact {
     --mh-brown-border: #4a3b2a;
 }
 
-    /* --- 1. ÉRADICATION DU BLEU SUR TOUTES LES ICÔNES --- */
-    #modal-mh i,
-    #modal-mh .modal-subtitle,
-    #modal-mh .doc-icon,
-    #modal-mh .dl-btn i {
+    #modal-mh i, #modal-mh .modal-subtitle, #modal-mh .doc-icon, #modal-mh .dl-btn i {
         color: var(--mh-gold) !important;
     }
 
-    /* --- 2. FOND DE LA MODALE --- */
     #modal-mh .modal-container {
         background-color: var(--mh-dark-leather) !important;
         border: 2px solid var(--mh-gold) !important;
@@ -1651,7 +1653,7 @@ footer#contact {
     }
 
         #modal-mh .modal-header h2 {
-            font-family: 'Playfair Display', serif;
+            font-family: "Playfair Display", serif;
             color: var(--mh-gold);
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -1661,7 +1663,6 @@ footer#contact {
             padding-bottom: 10px;
         }
 
-    /* --- 3. LES TAGS (Bordures propres) --- */
     #modal-mh .modal-tags-bar {
         gap: 15px;
     }
@@ -1671,29 +1672,28 @@ footer#contact {
             color: var(--mh-gold) !important;
             background: rgba(192, 160, 98, 0.05) !important;
             padding: 8px 15px !important;
-            border-radius: 4px !important; /* Bords légèrement arrondis plus élégants */
-            font-family: 'Oswald', sans-serif;
+            border-radius: 4px !important;
+            font-family: "Oswald", sans-serif;
             letter-spacing: 1px;
-            box-shadow: none !important; /* Retire les contours étranges */
+            box-shadow: none !important;
         }
 
-/* --- 4. LE BOUTON FIGMA --- */
 .mh-quest-btn {
     display: inline-flex;
     align-items: center;
     width: auto;
     padding: 12px 30px !important;
     font-size: 1.1rem;
-    font-family: 'Oswald', sans-serif;
+    font-family: "Oswald", sans-serif;
     text-transform: uppercase;
     letter-spacing: 2px;
     color: var(--mh-gold-bright) !important;
     background: linear-gradient(180deg, #2b2318, #1a1510) !important;
-    border: 1px solid var(--mh-gold) !important; /* Bordure simple et propre */
+    border: 1px solid var(--mh-gold) !important;
     border-radius: 4px !important;
     box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
-    transition: all 0.3s ease !important;
-    outline: none !important; /* Sécurité contre les doubles contours */
+    transition: all 0.4s var(--smooth-bezier) !important;
+    outline: none !important;
 }
 
     .mh-quest-btn i {
@@ -1710,39 +1710,35 @@ footer#contact {
     }
 
         .mh-quest-btn:hover i {
-            color: #1a1510 !important; /* L'icône devient sombre au survol pour contraster */
+            color: #1a1510 !important;
         }
 
-/* --- 5. TITRES ET TEXTES --- */
 #modal-mh .story-chapter-title {
-    font-family: 'Playfair Display', serif;
+    font-family: "Playfair Display", serif;
     color: var(--mh-gold) !important;
-    border-left: none !important; /* Supprime l'ancienne barre bleue verticale */
+    border-left: none !important;
     padding-left: 0;
 }
 
     #modal-mh .story-chapter-title::before {
-        content: '❖'; /* Symbole style MHW */
+        content: "❖";
         margin-right: 10px;
         color: var(--mh-gold);
         font-size: 0.8em;
     }
 
 #modal-mh .story-text p, #modal-mh .story-text ul {
-    color: #cbbba8; /* Couleur parchemin */
+    color: #cbbba8;
 }
 
 #modal-mh .story-text strong {
     color: var(--mh-gold-bright);
 }
 
-/* Sécurité anti-barres bleues sur tous les liens */
-#modal-mh .doc-card-inline,
-#modal-mh .dl-btn {
+#modal-mh .doc-card-inline, #modal-mh .dl-btn {
     border-left-color: var(--mh-gold) !important;
 }
 
-/* --- 6. COLONNE DES IMAGES --- */
 #modal-mh .visual-column .sticky-video-container {
     background-color: #0a0806 !important;
     border: 2px solid var(--mh-brown-border) !important;
@@ -1758,15 +1754,13 @@ footer#contact {
 
 #modal-mh .sticky-video-label {
     color: var(--mh-gold) !important;
-    font-family: 'Playfair Display', serif;
+    font-family: "Playfair Display", serif;
     letter-spacing: 1px;
 }
 
-/* =========================================
-   9. COMPOSANTS SPÉCIAUX
-   ========================================= */
-
-/* Code Viewer (Ungor) */
+/* ========================================= */
+/* 9. COMPOSANTS SPECIAUX                    */
+/* ========================================= */
 .code-viewer-container {
     background: #1e1e1e;
     border: 1px solid #444;
@@ -1774,7 +1768,7 @@ footer#contact {
     margin: 20px 0;
     overflow: hidden;
     position: relative;
-    font-family: 'Consolas', monospace;
+    font-family: "Consolas", monospace;
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
@@ -1802,7 +1796,7 @@ footer#contact {
     position: relative;
     max-height: 300px;
     overflow: hidden;
-    transition: max-height 0.5s ease-in-out;
+    transition: max-height 0.8s var(--smooth-bezier);
     padding: 15px;
 }
 
@@ -1826,7 +1820,7 @@ footer#contact {
     height: 100px;
     background: linear-gradient(to bottom, rgba(30,30,30,0), rgba(30,30,30,1));
     pointer-events: none;
-    transition: opacity 0.3s;
+    transition: opacity 0.4s var(--smooth-bezier);
 }
 
 .btn-see-all-code {
@@ -1837,10 +1831,10 @@ footer#contact {
     border-top: 1px solid #333;
     padding: 10px;
     cursor: pointer;
-    font-family: 'Oswald';
+    font-family: "Oswald";
     font-weight: bold;
     letter-spacing: 1px;
-    transition: all 0.3s;
+    transition: all 0.4s var(--smooth-bezier);
 }
 
     .btn-see-all-code:hover {
@@ -1848,7 +1842,6 @@ footer#contact {
         color: #000;
     }
 
-/* Comparison Slider (Chromesthesia) */
 .comparison-slider {
     position: relative;
     width: 100%;
@@ -1889,7 +1882,7 @@ footer#contact {
     background: rgba(0,0,0,0.8);
     color: #fff;
     padding: 5px 10px;
-    font-family: 'Oswald';
+    font-family: "Oswald";
     font-size: 0.8rem;
     border-radius: 4px;
     letter-spacing: 1px;
@@ -1948,7 +1941,6 @@ footer#contact {
     box-shadow: 0 0 15px #00f2ff;
 }
 
-/* HUD CV Button */
 .hud-cv-btn {
     position: fixed;
     bottom: 50px;
@@ -1960,12 +1952,12 @@ footer#contact {
     background: rgba(10, 10, 20, 0.95);
     text-decoration: none;
     text-transform: uppercase;
-    font-family: 'Oswald';
+    font-family: "Oswald";
     letter-spacing: 3px;
     display: flex;
     align-items: center;
     overflow: hidden;
-    transition: 0.3s;
+    transition: 0.4s var(--smooth-bezier);
     z-index: 9999;
     border: 2px solid rgba(74, 144, 226, 0.3);
     box-shadow: 0 0 30px rgba(0,0,0,0.6);
@@ -2069,21 +2061,14 @@ footer#contact {
     }
 }
 
-/* =========================================
-   NAVIGATION HUD (REMPLACEMENT TOP NAV)
-   ========================================= */
-
-.top-nav {
-    display: none !important;
-}
-
-/* CONFIGURATION DESKTOP (PC) - MENU À GAUCHE */
+/* ========================================= */
+/* NAVIGATION HUD                            */
+/* ========================================= */
 .hud-nav {
     position: fixed;
-    /* On a changé right: 30px en left: 50px pour aligner avec le logo */
     left: 50px;
     top: 50%;
-    transform: translateY(-50%); /* Centré verticalement */
+    transform: translateY(-50%);
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -2107,54 +2092,48 @@ footer#contact {
     color: #888;
     background: rgba(255,255,255,0.05);
     text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.5s var(--smooth-bezier);
     font-size: 1.1rem;
     border: 1px solid transparent;
 }
 
-    /* Tooltip (Le texte) - DOIT APPARAÎTRE À DROITE MAINTENANT */
     .hud-link::before {
         content: attr(data-tooltip);
         position: absolute;
-        /* On annule la droite et on met à gauche */
         right: auto;
         left: 60px;
         background: #4a90e2;
         color: white;
         padding: 5px 10px;
         border-radius: 4px;
-        font-family: 'Oswald', sans-serif;
+        font-family: "Oswald", sans-serif;
         font-size: 0.8rem;
         letter-spacing: 1px;
         opacity: 0;
-        /* Animation vient de la gauche vers la droite */
         transform: translateX(-10px);
         pointer-events: none;
-        transition: all 0.3s ease;
+        transition: all 0.4s var(--smooth-bezier);
         white-space: nowrap;
     }
-    /* Petite flèche du tooltip - DOIT POINTER VERS LA GAUCHE */
+
     .hud-link::after {
-        content: '';
+        content: "";
         position: absolute;
         right: auto;
         left: 54px;
         border-width: 5px;
         border-style: solid;
-        /* La pointe vers la gauche demande une bordure droite colorée */
         border-color: transparent var(--accent-blue) transparent transparent;
         opacity: 0;
         transform: translateX(-10px);
-        transition: all 0.3s ease;
+        transition: all 0.4s var(--smooth-bezier);
     }
 
-    .hud-link:hover::before,
-    .hud-link:hover::after {
+    .hud-link:hover::before, .hud-link:hover::after {
         opacity: 1;
         transform: translateX(0);
     }
 
-    /* --- ÉTAT ACTIF & HOVER --- */
     .hud-link:hover, .hud-link.active {
         color: #fff;
         background: var(--accent-blue);
@@ -2173,32 +2152,26 @@ footer#contact {
         color: #000;
     }
 
-
-/* =========================================
-   CORRECTIF BOUTON "READ MORE" (PC)
-   ========================================= */
-/* On cache le bouton par défaut sur PC */
 .btn-read-more {
     display: none;
 }
 
-/* =========================================
-   RESPONSIVE : ORDINATEURS PORTABLES (901px - 1600px)
-   ========================================= */
+/* ========================================= */
+/* RESPONSIVE                                */
+/* ========================================= */
 @media (max-width: 1920px) and (min-width: 901px) {
-    /* On décale UNIQUEMENT le titre "My Story" vers la droite pour éviter le logo */
     .section-bio .title-decor {
-        margin-left: 100px; /* Tu peux augmenter ce nombre (ex: 120px) s'il faut pousser plus */
+        margin-left: 100px;
     }
 }
-/* =========================================
-   MOBILE OVERHAUL (VERSION FINALE & ANIMÉE)
-   ========================================= */
-@media (max-width: 900px) { /* Changement à 900px pour englober tablettes */
 
-    /* 1. PERFORMANCE & BASE */
+@media (max-width: 900px) {
     #particle-canvas {
         display: none !important;
+    }
+
+    body::before {
+        display: none;
     }
 
     body {
@@ -2206,21 +2179,20 @@ footer#contact {
         width: 100%;
     }
 
-    /* 2. STICKY HEADER (NOM TOUJOURS VISIBLE) */
     .sidebar {
-        position: fixed; /* Reste collé en haut */
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
-        height: 70px; /* Hauteur fixe compacte */
+        height: 70px;
         padding: 0 20px;
-        background: rgba(10, 15, 25, 0.95); /* Fond sombre presque opaque */
-        backdrop-filter: blur(10px); /* Effet verre */
+        background: rgba(10, 15, 25, 0.95);
+        backdrop-filter: blur(10px);
         border-bottom: 1px solid rgba(255,255,255,0.1);
-        z-index: 5000; /* Au-dessus de tout */
+        z-index: 5000;
         display: flex;
         align-items: center;
-        justify-content: center; /* Centre le nom */
+        justify-content: center;
         box-shadow: 0 5px 20px rgba(0,0,0,0.5);
     }
 
@@ -2228,7 +2200,6 @@ footer#contact {
         text-align: center;
     }
 
-        /* Nom plus petit pour ne pas envahir l'écran */
         .logo-area h1 {
             font-size: 1.2rem;
             letter-spacing: 3px;
@@ -2236,16 +2207,10 @@ footer#contact {
             margin: 0;
         }
 
-    /* On cache le sous-titre sur mobile pour gagner de la place */
-    .sub-logo {
+    .sub-logo, .school-badge {
         display: none;
     }
 
-    .school-badge {
-        display: none;
-    }
-
-    /* On ajoute une marge en haut du site pour compenser le header fixe */
     main {
         margin-left: 0;
         padding: 0;
@@ -2253,29 +2218,26 @@ footer#contact {
         padding-top: 90px;
     }
 
-    /* 3. BIO : ORDRE LOGIQUE (TEXTE -> BOUTON -> IMAGES) */
     .section-bio {
         display: flex;
         flex-direction: column;
-        padding: 0 20px 40px; /* Ajustement padding */
-        width: 100%; /* Sécurité */
+        padding: 0 20px 40px;
+        width: 100%;
     }
 
-    /* C'EST ICI LE CHANGEMENT D'ORDRE */
     .bio-content, .bio-images {
-        width: 100% !important; /* On force à prendre toute la place */
+        width: 100% !important;
         max-width: 100%;
     }
 
     .bio-content {
         order: 1;
     }
-    /* Texte en PREMIER */
+
     .bio-images {
         order: 2;
         margin-top: 30px;
         margin-bottom: 0;
-        /* On aligne le carrousel à gauche pour qu'il commence au bord */
         justify-content: flex-start;
     }
 
@@ -2291,7 +2253,6 @@ footer#contact {
         line-height: 1.5;
     }
 
-        /* Gestion du "Read More" */
         .bio-text p:nth-child(n+2) {
             display: none;
         }
@@ -2303,7 +2264,7 @@ footer#contact {
         }
 
     .btn-read-more {
-        display: block !important; /* Force l'affichage sur mobile */
+        display: block !important;
         margin: 15px auto 0;
         background: transparent;
         border: 1px solid var(--accent-blue);
@@ -2321,43 +2282,36 @@ footer#contact {
         opacity: 1;
     }
 
-    /* 4. CARROUSEL AUTO-SCROLL (Alignement corrigé) */
     .bio-images {
         display: flex;
         flex-wrap: nowrap;
         overflow-x: auto;
-        /* CORRECTION: On aligne au début, sinon les premiers items sont coupés */
         justify-content: flex-start;
         gap: 15px;
         padding-bottom: 10px;
-        /* On masque la barre de défilement moche */
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
         .bio-images::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
+            display: none;
         }
 
     .circle {
-        /* 1. TAILLE FIXE (On garde ça, c'est bon) */
         width: 180px;
         height: 180px;
         flex: 0 0 180px;
         min-width: 180px;
         min-height: 180px;
-        /* 2. LE CORRECTIF IPHONE EST ICI */
-        /* "scroll" oblige l'image à rester collée au cercle */
         background-attachment: scroll !important;
         background-size: cover !important;
         background-position: center center !important;
         background-repeat: no-repeat;
-        /* 3. ESTHÉTIQUE */
         border-radius: 50%;
         border: 2px solid rgba(255,255,255,0.8);
         box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         margin-right: 15px;
-        animation: none; /* Pas d'animation flottante sur mobile */
+        animation: none;
     }
 
         .circle::after {
@@ -2370,7 +2324,6 @@ footer#contact {
             border-radius: 0 0 100px 100px;
         }
 
-    /* 5. SKILLS & PROJETS (Ajustements mineurs) */
     .section-skills {
         padding: 40px 20px;
     }
@@ -2432,15 +2385,11 @@ footer#contact {
         color: var(--accent-blue);
     }
 
-    /* 6. NAV BAR (CORRECTION BUG TAILLE GÉANTE) */
     .hud-nav {
-        /* RESET DES PROPRIÉTÉS PC QUI CAUSENT LE BUG */
         top: auto !important;
         right: auto !important;
-        /* IMPORTANT: On doit aussi reset le 'left' du PC sinon conflit */
         left: 50% !important;
         transform: translateX(-50%) !important;
-        /* PROPRIÉTÉS MOBILE */
         bottom: 20px;
         width: 90%;
         max-width: 400px;
@@ -2461,7 +2410,7 @@ footer#contact {
         color: #666;
         background: transparent;
     }
-        /* On cache les tooltips sur mobile */
+
         .hud-link::before, .hud-link::after {
             display: none;
         }
@@ -2474,7 +2423,7 @@ footer#contact {
         }
 
             .hud-link.active::after {
-                content: '';
+                content: "";
                 position: absolute;
                 bottom: -8px;
                 left: 50%;
@@ -2491,7 +2440,6 @@ footer#contact {
         display: none;
     }
 
-    /* MODALS & TIMELINE */
     .modal-container {
         width: 100%;
         height: 100%;
@@ -2530,17 +2478,16 @@ footer#contact {
         gap: 15px;
     }
 
-    /* MISE A JOUR SPLIT SCREEN MOBILE */
     .modal-split-layout {
         display: flex;
-        flex-direction: column-reverse; /* Texte en premier, vidéo au-dessus */
+        flex-direction: column-reverse;
         gap: 20px;
     }
 
     .visual-column {
-        position: relative; /* Pas de sticky sur mobile */
+        position: relative;
         top: auto;
-        order: 2; /* Vidéo en haut */
+        order: 2;
         width: 100%;
         margin-bottom: 20px;
     }
@@ -2555,9 +2502,9 @@ footer#contact {
     }
 }
 
-/* =========================================
-   CV CHOICE MODAL
-   ========================================= */
+/* ========================================= */
+/* CV CHOICE MODAL & MORE DETAILS            */
+/* ========================================= */
 .cv-modal-box {
     background: #15151e;
     padding: 40px;
@@ -2570,10 +2517,9 @@ footer#contact {
     width: 90%;
     transform: scale(0.8);
     opacity: 0;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.5s var(--smooth-bezier);
 }
 
-/* Animation d'ouverture (Pop) */
 .modal-overlay.active .cv-modal-box {
     transform: scale(1);
     opacity: 1;
@@ -2607,10 +2553,10 @@ footer#contact {
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
     text-decoration: none;
-    font-family: 'Oswald', sans-serif;
+    font-family: "Oswald", sans-serif;
     font-size: 1.1rem;
     border-radius: 5px;
-    transition: all 0.2s ease;
+    transition: all 0.4s var(--smooth-bezier);
 }
 
     .cv-btn-option:hover {
@@ -2628,15 +2574,13 @@ footer#contact {
     font-size: 1.5rem;
     color: #888;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.4s var(--smooth-bezier);
 }
 
     .close-cv-modal:hover {
         color: white;
     }
-/* =========================================
-   BOUTON "MORE DETAILS" DANS LA MODALE VIDÉO
-   ========================================= */
+
 .modal-more-details {
     position: absolute;
     bottom: 25px;
@@ -2649,7 +2593,7 @@ footer#contact {
     font-size: 1.1rem;
     letter-spacing: 2px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.5s var(--smooth-bezier);
     display: flex;
     align-items: center;
     gap: 12px;
